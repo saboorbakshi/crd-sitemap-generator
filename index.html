@@ -204,7 +204,7 @@
     font-weight: 500; white-space: nowrap; letter-spacing: -0.01em;
   }
   .badge-sub { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-  .badge-ext { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
 
   .children { overflow: hidden; transition: height 0.2s ease; }
   .children.collapsed { height: 0 !important; }
@@ -313,7 +313,6 @@ function renderTree(treeRoot, total) {
 
   function renderNode(node, parentUl, depth) {
     const hasChildren = node.children.length > 0;
-    const extCount = node._data?.external_links?.length || 0;
 
     const li = document.createElement('li');
     li.className = 'tree-item';
@@ -361,12 +360,7 @@ function renderTree(treeRoot, total) {
       b.textContent = `${node.children.length} subpages`;
       badges.appendChild(b);
     }
-    if (extCount) {
-      const b = document.createElement('span');
-      b.className = 'badge badge-ext';
-      b.textContent = `${extCount} external`;
-      badges.appendChild(b);
-    }
+
     if (node.url) {
       const a = document.createElement('a');
       a.className = 'visit-btn';
