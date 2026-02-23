@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Map — crdcreighton.com</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f8;
+    --border: #e4e4e8;
+    --text: #0a0a0a;
+    --text-secondary: rgba(10,10,10,0.55);
+    --text-muted: rgba(10,10,10,0.35);
+    --hover-bg: rgba(10,10,10,0.04);
+    --active-bg: rgba(10,10,10,0.07);
+    --indent-line: rgba(10,10,10,0.08);
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-border: #fecaca;
+    --blue: #2563eb;
+    --blue-hover: #1d4ed8;
+    --status-bg: #0a0a0a;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #ffffff;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-optical-sizing: auto;
+    font-size: 13px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-shell {
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 0 1px var(--border), 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  /* ── Header ── */
+  header {
+    flex-shrink: 0;
+    height: 54px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .logo {
+    font-size: 13px; font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .stats { display: flex; gap: 14px; font-size: 12px; color: var(--text-secondary); }
+  .stats b { color: var(--text); font-weight: 600; }
+
+
+
+  .btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px 12px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-optical-sizing: auto;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.12s;
+  }
+  .btn:hover { background: var(--surface); border-color: rgba(10,10,10,0.25); color: var(--text); }
+
+  /* ── Tree container ── */
+  #tree-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 8px 0 40px 0;
+  }
+  #tree-container::-webkit-scrollbar { width: 6px; height: 6px; }
+  #tree-container::-webkit-scrollbar-track { background: transparent; }
+  #tree-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Tree nodes ── */
+  ul.tree, ul.tree ul { list-style: none; padding: 0; margin: 0; }
+  .tree-item { position: relative; }
+
+  .tree-row {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding-right: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.1s;
+    border-radius: 5px;
+    margin: 1px 8px 1px 8px;
+  }
+  .tree-row:hover { background: var(--hover-bg); }
+  .tree-row.active { background: var(--active-bg); }
+
+  .indent-unit {
+    width: 20px; height: 32px;
+    position: relative; flex-shrink: 0;
+  }
+  .indent-unit::before {
+    content: '';
+    position: absolute;
+    left: 9px; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--indent-line);
+  }
+
+  .toggle {
+    width: 18px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 8px;
+    transition: transform 0.15s ease;
+  }
+  .toggle.open { transform: rotate(90deg); }
+  .toggle.leaf { opacity: 0; pointer-events: none; }
+
+  .row-icon {
+    width: 18px; margin-right: 6px;
+    flex-shrink: 0; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* name + url inline group */
+  .row-main {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1; min-width: 0; overflow: hidden;
+  }
+
+  .row-name {
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .row-name.root-name { font-weight: 600; }
+  .row-name mark {
+    background: rgba(10,10,10,0.1); color: var(--text);
+    border-radius: 2px; padding: 0 2px; font-weight: 600;
+  }
+
+  /* visit button — always visible, pill style like badges */
+  .visit-btn {
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #fff;
+    background: #3b75f2;
+    border: 1px solid #3b75f2;
+    border-radius: 20px;
+    padding: 2px 7px;
+    cursor: pointer;
+    text-decoration: none;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    transition: 0.1s;
+  }
+  .visit-btn:hover { background: #2558e3; border: 1px solid #2558e3 }
+
+  /* badges pushed to right */
+  .badges { display: flex; gap: 5px; align-items: center; margin-left: auto; padding-left: 10px; flex-shrink: 0; }
+  .badge {
+    font-size: 11px; padding: 2px 7px; border-radius: 20px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500; white-space: nowrap; letter-spacing: -0.01em;
+  }
+  .badge-sub { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-ext { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+  .children { overflow: hidden; transition: height 0.2s ease; }
+  .children.collapsed { height: 0 !important; }
+
+
+
+
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <header>
+    <div class="logo">Site Map <span>/ crdcreighton.com</span></div>
+    <div class="header-right">
+
+      <button class="btn" id="expand-all">Expand all</button>
+      <button class="btn" id="collapse-all">Collapse all</button>
+      <div class="stats" id="stats"></div>
+    </div>
+  </header>
+
+  <div id="tree-container">
+    <ul class="tree" id="tree-root"></ul>
+  </div>
+
+
+
+</div>
+<script>
+async function loadData() {
+  try {
+    const r = await fetch('./scraped_data.json');
+    if (r.ok) { const d = await r.json(); if (d.length) return d; }
+  } catch(e) {}
+  return generateDemoData();
+}
+
+function generateDemoData() {
+  const urls = [
+    ["https://www.crdcreighton.com/", 2],
+    ["https://www.crdcreighton.com/about", 0],
+    ["https://www.crdcreighton.com/about/team", 0],
+    ["https://www.crdcreighton.com/about/history", 1],
+    ["https://www.crdcreighton.com/services", 0],
+    ["https://www.crdcreighton.com/services/consulting", 0],
+    ["https://www.crdcreighton.com/services/design", 3],
+    ["https://www.crdcreighton.com/services/development", 0],
+    ["https://www.crdcreighton.com/portfolio", 0],
+    ["https://www.crdcreighton.com/portfolio/project-1", 2],
+    ["https://www.crdcreighton.com/portfolio/project-2", 0],
+    ["https://www.crdcreighton.com/contact", 1],
+    ["https://www.crdcreighton.com/blog", 0],
+    ["https://www.crdcreighton.com/blog/post-1", 0],
+    ["https://www.crdcreighton.com/blog/post-2", 4],
+  ];
+  const ext = ['https://twitter.com','https://facebook.com','https://linkedin.com','https://instagram.com'];
+  return urls.map(([url, n]) => ({
+    url, title: url.split('/').filter(Boolean).pop() || 'home',
+    status_code: 200, external_links: ext.slice(0, n),
+  }));
+}
+
+function buildTree(data) {
+  const root = { name: '/', path: '/', url: '', children: {}, _data: null };
+  const sorted = [...data].sort((a,b) => a.url.localeCompare(b.url));
+  for (const page of sorted) {
+    let parsed; try { parsed = new URL(page.url); } catch(e) { continue; }
+    const parts = parsed.pathname.replace(/\/$/, '').split('/').filter(Boolean);
+    if (!parts.length) { root._data = page; root.url = page.url; continue; }
+    let node = root, pathSoFar = '';
+    for (const part of parts) {
+      pathSoFar += '/' + part;
+      if (!node.children[part])
+        node.children[part] = { name: part, path: pathSoFar, url: '', children: {}, _data: null };
+      node = node.children[part];
+    }
+    node.url = page.url; node._data = page;
+  }
+  function toNode(n) {
+    // Sort: folders (has children) first alphabetically, then pages alphabetically
+    const children = Object.values(n.children).map(toNode);
+    children.sort((a, b) => {
+      const aIsDir = a.children.length > 0;
+      const bIsDir = b.children.length > 0;
+      if (aIsDir && !bIsDir) return -1;
+      if (!aIsDir && bIsDir) return 1;
+      return a.name.localeCompare(b.name);
+    });
+    return { name: n.name, path: n.path, url: n.url, _data: n._data, children };
+  }
+  return toNode(root);
+}
+
+function countDescendants(node) {
+  return node.children.reduce((acc, c) => acc + 1 + countDescendants(c), 0);
+}
+
+let allRows = [];
+
+function renderTree(treeRoot, total) {
+  document.getElementById('stats').innerHTML = `<span><b>${total}</b> pages</span>`;
+  const rootEl = document.getElementById('tree-root');
+  rootEl.innerHTML = '';
+  allRows = [];
+
+  function renderNode(node, parentUl, depth) {
+    const hasChildren = node.children.length > 0;
+    const extCount = node._data?.external_links?.length || 0;
+
+    const li = document.createElement('li');
+    li.className = 'tree-item';
+
+    const row = document.createElement('div');
+    row.className = 'tree-row';
+
+    // Indent
+    for (let d = 0; d < depth; d++) {
+      const unit = document.createElement('span');
+      unit.className = 'indent-unit';
+      row.appendChild(unit);
+    }
+
+    // Toggle
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle' + (hasChildren ? '' : ' leaf');
+    toggle.textContent = '▶';
+    row.appendChild(toggle);
+
+    // Icon
+    const icon = document.createElement('span');
+    icon.className = 'row-icon';
+    icon.textContent = depth === 0 ? '🌐' : hasChildren ? '📁' : '📄';
+    row.appendChild(icon);
+
+    // Name + visit button grouped together
+    const rowMain = document.createElement('span');
+    rowMain.className = 'row-main';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'row-name' + (depth === 0 ? ' root-name' : '');
+    nameEl._rawText = depth === 0 ? '/' : node.name;
+    nameEl.textContent = nameEl._rawText;
+    rowMain.appendChild(nameEl);
+
+    row.appendChild(rowMain);
+
+    // Badges + visit link at the far right
+    const badges = document.createElement('span');
+    badges.className = 'badges';
+    if (hasChildren) {
+      const b = document.createElement('span');
+      b.className = 'badge badge-sub';
+      b.textContent = `${node.children.length} subpages`;
+      badges.appendChild(b);
+    }
+    if (extCount) {
+      const b = document.createElement('span');
+      b.className = 'badge badge-ext';
+      b.textContent = `${extCount} external`;
+      badges.appendChild(b);
+    }
+    if (node.url) {
+      const a = document.createElement('a');
+      a.className = 'visit-btn';
+      a.href = node.url; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = 'Visit link';
+      a.addEventListener('click', e => e.stopPropagation());
+      badges.appendChild(a);
+    }
+    row.appendChild(badges);
+
+    li.appendChild(row);
+    allRows.push({ row, node, nameEl, depth });
+
+    let childrenEl = null;
+    if (hasChildren) {
+      childrenEl = document.createElement('div');
+      childrenEl.className = 'children collapsed';
+      childrenEl.style.height = '0px';
+      const childUl = document.createElement('ul');
+      childUl.className = 'tree';
+      node.children.forEach(child => renderNode(child, childUl, depth + 1));
+      childrenEl.appendChild(childUl);
+      li.appendChild(childrenEl);
+      row.addEventListener('click', () => toggleNode(childrenEl, toggle, node, row));
+    }
+
+    row.addEventListener('mouseenter', () => {});
+    parentUl.appendChild(li);
+  }
+
+  renderNode(treeRoot, rootEl, 0);
+
+  requestAnimationFrame(() => {
+    const first = allRows[0];
+    if (first) {
+      const li = first.row.closest('.tree-item');
+      const childrenEl = li.querySelector(':scope > .children');
+      const toggle = first.row.querySelector('.toggle');
+      if (childrenEl) expandNode(childrenEl, toggle, treeRoot, first.row);
+    }
+
+  });
+}
+
+function expandNode(childrenEl, toggle, node, row) {
+  childrenEl.classList.remove('collapsed');
+  childrenEl.style.height = childrenEl.scrollHeight + 'px';
+  toggle.classList.add('open');
+  row.classList.add('active');
+  childrenEl.addEventListener('transitionend', () => {
+    if (!childrenEl.classList.contains('collapsed')) childrenEl.style.height = 'auto';
+  }, { once: true });
+}
+
+function collapseNode(childrenEl, toggle, row) {
+  childrenEl.style.height = childrenEl.scrollHeight + 'px';
+  requestAnimationFrame(() => {
+    childrenEl.classList.add('collapsed');
+    childrenEl.style.height = '0px';
+    toggle.classList.remove('open');
+    row.classList.remove('active');
+  });
+}
+
+function toggleNode(childrenEl, toggle, node, row) {
+  childrenEl.classList.contains('collapsed')
+    ? expandNode(childrenEl, toggle, node, row)
+    : collapseNode(childrenEl, toggle, row);
+}
+
+
+
+
+
+function setAll(expand) {
+  allRows.forEach(({ row, node }) => {
+    if (!node.children.length) return;
+    const li = row.closest('.tree-item');
+    const childrenEl = li.querySelector(':scope > .children');
+    const toggle = row.querySelector('.toggle');
+    if (!childrenEl) return;
+    const collapsed = childrenEl.classList.contains('collapsed');
+    if (expand && collapsed) expandNode(childrenEl, toggle, node, row);
+    else if (!expand && !collapsed) collapseNode(childrenEl, toggle, row);
+  });
+}
+
+loadData().then(data => {
+  const tree = buildTree(data);
+  renderTree(tree, data.length);
+  document.getElementById('expand-all').addEventListener('click', () => setAll(true));
+  document.getElementById('collapse-all').addEventListener('click', () => setAll(false));
+});
+</script>
+</body>
+</html>
