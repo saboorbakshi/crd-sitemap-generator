@@ -22,6 +22,9 @@
     --green: #16a34a;
     --green-bg: #f0fdf4;
     --green-border: #bbf7d0;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --purple-border: #ddd6fe;
     --red: #dc2626;
     --red-bg: #fef2f2;
     --red-border: #fecaca;
@@ -77,8 +80,6 @@
 
   .stats { display: flex; gap: 14px; font-size: 12px; color: var(--text-secondary); }
   .stats b { color: var(--text); font-weight: 600; }
-
-
 
   .btn {
     background: var(--bg);
@@ -175,7 +176,7 @@
     border-radius: 2px; padding: 0 2px; font-weight: 600;
   }
 
-  /* visit button — always visible, pill style like badges */
+  /* visit button */
   .visit-btn {
     font-size: 11px;
     font-weight: 500;
@@ -204,14 +205,10 @@
     font-weight: 500; white-space: nowrap; letter-spacing: -0.01em;
   }
   .badge-sub { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-
+  .badge-total { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
 
   .children { overflow: hidden; transition: height 0.2s ease; }
   .children.collapsed { height: 0 !important; }
-
-
-
-
 </style>
 </head>
 <body>
@@ -220,7 +217,6 @@
   <header>
     <div class="logo">Site Map <span>/ crdcreighton.com</span></div>
     <div class="header-right">
-
       <button class="btn" id="expand-all">Expand all</button>
       <button class="btn" id="collapse-all">Collapse all</button>
       <div class="stats" id="stats"></div>
@@ -230,8 +226,6 @@
   <div id="tree-container">
     <ul class="tree" id="tree-root"></ul>
   </div>
-
-
 
 </div>
 <script>
@@ -285,7 +279,6 @@ function buildTree(data) {
     node.url = page.url; node._data = page;
   }
   function toNode(n) {
-    // Sort: folders (has children) first alphabetically, then pages alphabetically
     const children = Object.values(n.children).map(toNode);
     children.sort((a, b) => {
       const aIsDir = a.children.length > 0;
@@ -299,6 +292,13 @@ function buildTree(data) {
   return toNode(root);
 }
 
+// Count all nodes that have actual page data, including self
+function countPages(node) {
+  const self = node._data ? 1 : 0;
+  return node.children.reduce((acc, c) => acc + countPages(c), self);
+}
+
+// Count direct child nodes only (structural, not data-based)
 function countDescendants(node) {
   return node.children.reduce((acc, c) => acc + 1 + countDescendants(c), 0);
 }
@@ -306,13 +306,18 @@ function countDescendants(node) {
 let allRows = [];
 
 function renderTree(treeRoot, total) {
-  document.getElementById('stats').innerHTML = `<span><b>${total}</b> pages</span>`;
+  // Use the actual page count from the tree (nodes with _data), falling back to raw total
+  const treeTotal = countPages(treeRoot);
+  document.getElementById('stats').innerHTML = `<span><b>${treeTotal || total}</b> pages</span>`;
   const rootEl = document.getElementById('tree-root');
   rootEl.innerHTML = '';
   allRows = [];
 
   function renderNode(node, parentUl, depth) {
     const hasChildren = node.children.length > 0;
+    const directCount = node.children.length;
+    // Total = all pages with actual data in this subtree (excluding self)
+    const totalCount = node.children.reduce((acc, c) => acc + countPages(c), 0);
 
     const li = document.createElement('li');
     li.className = 'tree-item';
@@ -339,7 +344,7 @@ function renderTree(treeRoot, total) {
     icon.textContent = depth === 0 ? '🌐' : hasChildren ? '📁' : '📄';
     row.appendChild(icon);
 
-    // Name + visit button grouped together
+    // Name
     const rowMain = document.createElement('span');
     rowMain.className = 'row-main';
 
@@ -354,11 +359,23 @@ function renderTree(treeRoot, total) {
     // Badges + visit link at the far right
     const badges = document.createElement('span');
     badges.className = 'badges';
+
     if (hasChildren) {
-      const b = document.createElement('span');
-      b.className = 'badge badge-sub';
-      b.textContent = `${node.children.length} subpages`;
-      badges.appendChild(b);
+      // Direct subpages badge (green)
+      const bSub = document.createElement('span');
+      bSub.className = 'badge badge-sub';
+      bSub.title = 'Direct subpages';
+      bSub.textContent = `${directCount} subpage${directCount !== 1 ? 's' : ''}`;
+      badges.appendChild(bSub);
+
+      // Total inner pages badge (purple) — only show if different from direct count
+      if (totalCount !== directCount) {
+        const bTotal = document.createElement('span');
+        bTotal.className = 'badge badge-total';
+        bTotal.title = 'Total inner pages (all descendants)';
+        bTotal.textContent = `${totalCount} total`;
+        badges.appendChild(bTotal);
+      }
     }
 
     if (node.url) {
@@ -387,7 +404,6 @@ function renderTree(treeRoot, total) {
       row.addEventListener('click', () => toggleNode(childrenEl, toggle, node, row));
     }
 
-    row.addEventListener('mouseenter', () => {});
     parentUl.appendChild(li);
   }
 
@@ -401,7 +417,6 @@ function renderTree(treeRoot, total) {
       const toggle = first.row.querySelector('.toggle');
       if (childrenEl) expandNode(childrenEl, toggle, treeRoot, first.row);
     }
-
   });
 }
 
@@ -430,10 +445,6 @@ function toggleNode(childrenEl, toggle, node, row) {
     ? expandNode(childrenEl, toggle, node, row)
     : collapseNode(childrenEl, toggle, row);
 }
-
-
-
-
 
 function setAll(expand) {
   allRows.forEach(({ row, node }) => {
